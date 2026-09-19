@@ -1,4 +1,5 @@
 const menuButton = document.querySelector('.mobile-toggle');
+document.querySelectorAll('a.placeholder-link').forEach(link => link.addEventListener('click', event => event.preventDefault()));
 if (menuButton) {
   const drawer = document.createElement('dialog');
   drawer.id = 'mobile-menu';
@@ -46,4 +47,30 @@ document.querySelectorAll('[data-filter]').forEach(button => button.addEventList
 document.querySelector('#contact-form')?.addEventListener('submit', event => {
   event.preventDefault();
   document.querySelector('#form-status').textContent = 'Форма заполнена корректно. Это демонстрационная версия: заявка не отправлена. Отправка станет доступна после подключения сервера.';
+});
+
+const workDetail = document.querySelector('#work-detail');
+if (workDetail) {
+  const workId = new URLSearchParams(window.location.search).get('id');
+  const work = window.WORKS_DATA?.[workId];
+  if (work) {
+    document.title = `${work.title} — Adilet-lift`;
+    const photosWord = work.photos.length % 10 === 1 && work.photos.length % 100 !== 11 ? 'фотография' : (work.photos.length % 10 >= 2 && work.photos.length % 10 <= 4 && (work.photos.length % 100 < 10 || work.photos.length % 100 >= 20) ? 'фотографии' : 'фотографий');
+    workDetail.innerHTML = `<div class="page-head work-detail-head"><div class="breadcrumbs"><a href="index.html">Главная</a><span>/</span><a href="works.html">Наши работы</a><span>/</span><span>${work.title}</span></div><div class="eyebrow">${work.number}</div><h1>${work.title}</h1><p>${work.description}</p><div class="work-meta">${work.meta.map(item => `<span>${item}</span>`).join('')}<span>${work.photos.length} ${photosWord}</span></div></div><div class="work-detail-gallery">${work.photos.map((photo, index) => `<button data-gallery-image data-src="${photo.src}" data-caption="${photo.caption}" aria-label="Открыть фотографию ${index + 1}: ${photo.caption}"><img src="${photo.src}" alt="${photo.alt}" loading="lazy"><span>${String(index + 1).padStart(2, '0')} / ${photo.caption}</span></button>`).join('')}</div><a class="text-link work-back" href="works.html"><i class="ph ph-arrow-left" aria-hidden="true"></i> Все объекты</a>`;
+  } else {
+    workDetail.innerHTML = '<div class="page-head"><div class="eyebrow">Портфолио</div><h1>Объект не найден.</h1><p>Возможно, ссылка устарела или объект был перемещён.</p><a class="button" href="works.html">Вернуться к работам<i class="ph ph-arrow-right" aria-hidden="true"></i></a></div>';
+  }
+}
+
+const galleryModal = document.querySelector('#gallery-modal');
+document.querySelectorAll('[data-gallery-image]').forEach(button => button.addEventListener('click', () => {
+  const image = galleryModal.querySelector('img');
+  image.src = button.dataset.src;
+  image.alt = button.querySelector('img')?.alt || button.dataset.caption;
+  galleryModal.querySelector('figcaption').textContent = button.dataset.caption;
+  galleryModal.showModal();
+}));
+galleryModal?.querySelector('.gallery-modal-close').addEventListener('click', () => galleryModal.close());
+galleryModal?.addEventListener('click', event => {
+  if (event.target === galleryModal) galleryModal.close();
 });
